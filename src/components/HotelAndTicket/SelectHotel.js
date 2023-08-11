@@ -1,11 +1,31 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import styled from 'styled-components';
+import { createTicket, getTicketType } from '../../../src/services/ticketsApi';
+import useToken from '../../hooks/useToken';
+import { toast } from 'react-toastify';
+import TicketContext from '../../contexts/ticketsContext';
 
 export default function SelectHotel() {
   const [withHotel, setWithHotel] = useState(false);
   const [withoutHotel, setWithoutHotel] = useState(false);
   const [renderPrice, setRenderPrice] = useState(false);
   const [price, setPrice] = useState(0);
+  const token = useToken();
+  const { useTicketType, useTicket } = useContext(TicketContext);
+
+  async function reserveTicket() {
+    try{
+      const ticketType = await getTicketType(token);
+      useTicketType(ticketType);
+      const body = ticketType.id;
+      const ticket = await createTicket(token, body);
+      useTicket(ticket);
+      toast('Reserva efetuada com sucesso!');
+    } catch (error) {
+      toast('Ocorreu um erro inesperado. Tente novamente mais tarde');
+    } 
+  }
+
   function withHotelTicket() {
     if (withHotel) {
       setWithHotel(false);
@@ -47,7 +67,7 @@ export default function SelectHotel() {
             Fechado! O total ficou em <span>R$ {price}</span>. Agora é só
             confirmar:
           </h1>
-          <button>RESERVAR INGRESSO</button>
+          <button onClick={reserveTicket}>RESERVAR INGRESSO</button>
         </TotalPrice>
       )}
     </Container>
