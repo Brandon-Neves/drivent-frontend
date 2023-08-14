@@ -1,3 +1,11 @@
+<<<<<<< HEAD
+import ResumeAndPayment from '../../../components/ResumeAndPayment';
+export default function Payment() {
+  return (
+    <ResumeAndPayment />
+  );
+};
+=======
 import { useContext, useEffect } from 'react';
 import TicketsAndPayment from '../../../components/TicketsAndPayment/index';
 import useToken from '../../../hooks/useToken';
@@ -22,3 +30,4 @@ export default function Payment() {
     <TicketsAndPayment/>
   );
 }
+>>>>>>> cd310c19823248513a4b04732de7ee51d62d55f5
