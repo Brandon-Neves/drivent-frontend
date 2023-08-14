@@ -1,10 +1,39 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import SelectHotel from '../HotelAndTicket/SelectHotel';
+import useToken from '../../hooks/useToken';
+import TicketContext from '../../contexts/ticketsContext';
+import { toast } from 'react-toastify';
+import { createTicket } from '../../services/ticketsApi';
 
 export default function TicketsAndPayment() {
   const [presentialButton, setPresentialButton] = useState(false);
   const [onlineButton, setOnlineButton] = useState(false);
+  const token = useToken();
+  const { ticketType, setTicket } = useContext(TicketContext);
+  const priceOnlineTicket = ticketType && 
+  ticketType.find((ticket) => ticket.isRemote).price;
+  const priceInPersonTicket = ticketType && 
+  ticketType.find((ticket) => (!ticket.isRemote && !ticket.includesHotel)).price;
+
+  async function reserveOnlineTicket() {
+    const onlineTicketType = ticketType.find((ticket) => ticket.isRemote);
+    console.log(onlineTicketType.id);
+    if(onlineTicketType === undefined) {
+      toast('Não foi encontrado ingresso para esta opção');
+      return;
+    }
+
+    try{
+      const ticket = await createTicket(token, onlineTicketType.id);
+      setTicket(ticket);
+      toast('Reserva efetuada com sucesso!');
+    } catch (error) {
+      console.log(error);
+      toast('Ocorreu um erro inesperado. Tente novamente mais tarde');
+    } 
+  }
+
   function presential() {
     if (presentialButton) {
       setPresentialButton(false);
@@ -34,21 +63,21 @@ export default function TicketsAndPayment() {
             presentialButton={presentialButton}
           >
             <buttonName>Presencial</buttonName>
-            <Price>R$ 250</Price>
+            <Price>R$ {priceInPersonTicket}</Price>
           </TicketTypeButton>
           <TicketTypeButton onClick={online} onlineButton={onlineButton}>
             <buttonName>Online</buttonName>
-            <Price>R$ 100</Price>
+            <Price>R$ {priceOnlineTicket}</Price>
           </TicketTypeButton>
         </ButtonsContainer>
         {presentialButton && <SelectHotel />}
         {onlineButton && (
           <TotalPrice presentialButton={presentialButton}>
             <h1>
-              Fechado! O total ficou em <span>R$ 100</span>. Agora é só
+              Fechado! O total ficou em <span>R$ {priceOnlineTicket}</span>. Agora é só
               confirmar:
             </h1>
-            <button>RESERVAR INGRESSO</button>
+            <button onClick={reserveOnlineTicket}>RESERVAR INGRESSO</button>
           </TotalPrice>
         )}
       </Container>

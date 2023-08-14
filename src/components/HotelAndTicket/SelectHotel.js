@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
 import styled from 'styled-components';
-import { createTicket, getTicketType } from '../../../src/services/ticketsApi';
+import { createTicket } from '../../../src/services/ticketsApi';
 import useToken from '../../hooks/useToken';
 import { toast } from 'react-toastify';
 import TicketContext from '../../contexts/ticketsContext';
@@ -11,17 +11,30 @@ export default function SelectHotel() {
   const [renderPrice, setRenderPrice] = useState(false);
   const [price, setPrice] = useState(0);
   const token = useToken();
-  const { useTicketType, useTicket } = useContext(TicketContext);
+  const { ticketType, setTicket } = useContext(TicketContext);
+  const priceInPersonTicketWithHotel = ticketType && 
+  ticketType.find((ticket) => (!ticket.isRemote && ticket.includesHotel)).price;
+  const priceInPersonTicketWithoutHotel = ticketType && 
+  ticketType.find((ticket) => (!ticket.isRemote && !ticket.includesHotel)).price;
 
-  async function reserveTicket() {
+  async function reserveInPersonTicket() {
+    let ticket = {};
+    if(withHotel && ticketType) {
+      ticket = ticketType.find((t) => (!t.isRemote && t.includesHotel));
+    } else if (withoutHotel && ticketType) {
+      ticket = ticketType.find((t) => (!t.isRemote && !t.includesHotel));
+    }
+    if(!ticket) {
+      toast('Não foi encontrado ingresso para esta opção');
+      return;
+    }
+    console.log(ticket.id);
     try{
-      const ticketType = await getTicketType(token);
-      useTicketType(ticketType);
-      const body = ticketType.id;
-      const ticket = await createTicket(token, body);
-      useTicket(ticket);
+      const ticketFromDB = await createTicket(token, ticket.id);
+      setTicket(ticketFromDB);
       toast('Reserva efetuada com sucesso!');
     } catch (error) {
+      console.log(error);
       toast('Ocorreu um erro inesperado. Tente novamente mais tarde');
     } 
   }
@@ -58,16 +71,16 @@ export default function SelectHotel() {
         </WithoutHotel>
         <WithHotel onClick={withHotelTicket} withHotel={withHotel}>
           <h2>Com Hotel</h2>
-          <p>+ 350</p>
+          <p>+ {priceInPersonTicketWithHotel - priceInPersonTicketWithoutHotel}</p>
         </WithHotel>
       </div>
       {renderPrice && (
         <TotalPrice>
           <h1>
-            Fechado! O total ficou em <span>R$ {price}</span>. Agora é só
+            Fechado! O total ficou em <span>R$ {withHotel? priceInPersonTicketWithHotel: priceInPersonTicketWithoutHotel}</span>. Agora é só
             confirmar:
           </h1>
-          <button onClick={reserveTicket}>RESERVAR INGRESSO</button>
+          <button onClick={reserveInPersonTicket}>RESERVAR INGRESSO</button>
         </TotalPrice>
       )}
     </Container>
