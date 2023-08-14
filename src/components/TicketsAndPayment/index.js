@@ -18,14 +18,14 @@ export default function TicketsAndPayment() {
 
   async function reserveOnlineTicket() {
     const onlineTicketType = ticketType.find((ticket) => ticket.isRemote);
-    console.log(onlineTicketType.id);
+  
     if(onlineTicketType === undefined) {
       toast('Não foi encontrado ingresso para esta opção');
       return;
     }
-
+    const body = { ticketTypeId: onlineTicketType.id };
     try{
-      const ticket = await createTicket(token, onlineTicketType.id);
+      const ticket = await createTicket(token, body);
       setTicket(ticket);
       toast('Reserva efetuada com sucesso!');
     } catch (error) {

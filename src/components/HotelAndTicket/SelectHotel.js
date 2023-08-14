@@ -28,9 +28,9 @@ export default function SelectHotel() {
       toast('Não foi encontrado ingresso para esta opção');
       return;
     }
-    console.log(ticket.id);
+    const body = { ticketTypeId: ticket.id };
     try{
-      const ticketFromDB = await createTicket(token, ticket.id);
+      const ticketFromDB = await createTicket(token, body);
       setTicket(ticketFromDB);
       toast('Reserva efetuada com sucesso!');
     } catch (error) {
