@@ -2,6 +2,8 @@
 
 Front-end for Driven.t, an event management solution.
 
+![drivent](https://github.com/Brandon-Neves/drivent-frontend/assets/90806965/26f56ceb-969a-408d-836b-ef62bb910a92)
+
 ## About
 
 Driven.t is a web browser application with which you can manage every single aspect of your event.
